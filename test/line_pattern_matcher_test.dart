@@ -108,4 +108,114 @@ void main() {
         contains(
             'PatternConfig{type: lastLine, keywords: [[Goodbye]], logic: and}'));
   });
+
+  test('Scattered pattern', () {
+    final matcher = LinePatternMatcher([
+      PatternConfig(
+        type: 'scattered',
+        keywords: [
+          ['Hello'],
+          ['World'],
+          ['Goodbye']
+        ],
+      )
+    ]);
+    expect(matcher.match(['Hello there', 'Nice World', 'Goodbye everyone']),
+        isTrue);
+    expect(matcher.match(['Hello there', 'Nice planet', 'See you']), isFalse);
+    expect(matcher.match(['World Hello', 'Goodbye', 'Hi there']), isTrue);
+  });
+
+  test('Scattered pattern with OR logic', () {
+    final matcher = LinePatternMatcher([
+      PatternConfig(
+          type: 'scattered',
+          keywords: [
+            ['Hello'],
+            ['World'],
+            ['Goodbye']
+          ],
+          logic: LogicType.or)
+    ]);
+    expect(matcher.match(['Hello there', 'Beautiful Earth', 'Bye everyone']),
+        isTrue);
+    expect(matcher.match(['Hi', 'Nice planet', 'See you']), isFalse);
+  });
+
+  test('OrderedScattered pattern', () {
+    final matcher = LinePatternMatcher([
+      PatternConfig(
+        type: 'orderedScattered',
+        keywords: [
+          ['First'],
+          ['Second'],
+          ['Third']
+        ],
+      )
+    ]);
+    expect(
+        matcher.match(
+            ['First line', 'Something else', 'Second here', 'Third line']),
+        isTrue);
+    expect(matcher.match(['Second line', 'First here', 'Third line']), isFalse);
+    expect(matcher.match(['First line', 'Third here', 'Second line']), isFalse);
+  });
+
+  test('OrderedScattered pattern with multiple keywords per set', () {
+    final matcher = LinePatternMatcher([
+      PatternConfig(
+        type: 'orderedScattered',
+        keywords: [
+          ['Hello', 'World'],
+          ['How', 'are'],
+          ['Goodbye', 'everyone']
+        ],
+      )
+    ]);
+    expect(
+        matcher.match([
+          'Hello beautiful World',
+          'Some other line',
+          'How nice are you',
+          'Goodbye to everyone'
+        ]),
+        isTrue);
+    expect(matcher.match(['Hello World', 'Goodbye everyone', 'How are you']),
+        isFalse);
+  });
+
+  test('Complex pattern with multiple types', () {
+    final matcher = LinePatternMatcher([
+      PatternConfig(type: 'firstLine', keywords: [
+        ['Start']
+      ]),
+      PatternConfig(
+        type: 'orderedScattered',
+        keywords: [
+          ['Hello'],
+          ['World']
+        ],
+      ),
+      PatternConfig(type: 'lastLine', keywords: [
+        ['End']
+      ])
+    ]);
+    expect(
+        matcher.match([
+          'Start here',
+          'Hello there',
+          'Something else',
+          'World is nice',
+          'End now'
+        ]),
+        isTrue);
+    expect(
+        matcher
+            .match(['Start here', 'World is nice', 'Hello there', 'End now']),
+        isFalse);
+    expect(
+        matcher
+            .match(['Begin here', 'Hello there', 'World is nice', 'End now']),
+        isFalse);
+  });
 }

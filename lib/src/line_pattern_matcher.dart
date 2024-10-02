@@ -110,6 +110,12 @@ class LinePatternMatcher {
         case 'lastLine':
           matched = matchLine(lines.last, keywords, logic);
           break;
+        case 'scattered':
+          matched = matchScattered(lines, keywords, logic);
+          break;
+        case 'orderedScattered':
+          matched = matchOrderedScattered(lines, keywords);
+          break;
         case 'sequential':
           for (int i = sequentialIndex;
               i < lines.length - keywords.length + 1;
@@ -142,8 +148,46 @@ class LinePatternMatcher {
     return keywordSet.every((keyword) => line.contains(keyword));
   }
 
+  bool matchScattered(
+      List<String> lines, List<List<String>> keywords, String logic) {
+    if (logic == LogicType.and) {
+      return keywords.every((keywordSet) {
+        return lines.any((line) => matchKeywordSet(line, keywordSet));
+      });
+    } else {
+      return keywords.any((keywordSet) {
+        return lines.any((line) => matchKeywordSet(line, keywordSet));
+      });
+    }
+  }
+
+  bool matchOrderedScattered(List<String> lines, List<List<String>> keywords) {
+    int currentLineIndex = 0;
+    for (var keywordSet in keywords) {
+      bool foundMatch = false;
+      for (int i = currentLineIndex; i < lines.length; i++) {
+        if (matchKeywordSet(lines[i], keywordSet)) {
+          foundMatch = true;
+          currentLineIndex = i + 1;
+          break;
+        }
+      }
+      if (!foundMatch) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   bool matchSequential(List<String> lines, List<List<String>> keywords) {
     if (lines.length < keywords.length) return false;
+    for (int i = 0; i < lines.length - keywords.length + 1; i++) {
+      if (matchSequentialFrom(lines.sublist(i), keywords)) return true;
+    }
+    return false;
+  }
+
+  bool matchSequentialFrom(List<String> lines, List<List<String>> keywords) {
     for (int i = 0; i < keywords.length; i++) {
       if (!matchKeywordSet(lines[i], keywords[i])) return false;
     }

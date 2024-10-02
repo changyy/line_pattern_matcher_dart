@@ -1,6 +1,6 @@
 name: line_pattern_matcher
 description: A flexible Dart package for matching complex patterns across multiple lines of text. Ideal for log analysis, text processing, and pattern recognition tasks.
-version: 1.0.1
+version: 1.1.0
 homepage: https://github.com/changyy/line_pattern_matcher_dart
 repository: https://github.com/changyy/line_pattern_matcher_dart
 issue_tracker: https://github.com/changyy/line_pattern_matcher_dart/issues
